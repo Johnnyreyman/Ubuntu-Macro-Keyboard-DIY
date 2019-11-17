@@ -14,7 +14,8 @@ else
 		wget https://github.com/thkala/actkbd/archive/master.zip
 		unzip /tmp/master.zip
 		cd /tmp/actkbd-master
-		gksudo make install
+        cp ../actkbd.config .
+		sudo -i  make install
     else
         zenity --info --text "Setup cancelled."
         exit
@@ -26,7 +27,14 @@ fi
 zenity --info --text "Copy the correct device ID for the second keyboard from the list."
 cd /tmp
 xinput list |  xargs -L 20 > Devices.txt
-leafpad Devices.txt
+# Check that leafpad exists
+if [ "$(command -v leafpad)" ]
+then
+    leafpad Devices.txt
+else
+    sudo apt install -y leafpad
+    leafpad Devices.txt
+fi
 #xclip utility is required to paste clipboard contents into script.
 sudo apt install -y xclip
 ID="$(xclip -selection c -o)"
