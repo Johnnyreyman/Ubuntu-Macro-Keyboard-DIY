@@ -1,6 +1,5 @@
 #!/bin/bash
 #This script automates the process of creating a macro-keyboard from any second keyboard using actkbd.
-# Make a function that tests if actkbd exists
 zenity --info --text "This simple wizard will help you enable your second keyboard to be a macro-keyboard."
 #Test=$("command -v actkbd")
 # Check that actkbd exists
@@ -20,7 +19,7 @@ else
         zenity --info --text "Setup cancelled."
         exit
     fi
-zenity --info --text "Install of 'actkbd' completed sucessfully."
+zenity --info --text "Installation of 'actkbd' completed sucessfully."
 
 fi
 
@@ -30,12 +29,12 @@ xinput list | & xargs -L 20 > Devices.txt
 leafpad Devices.txt
 #xclip utility is required to paste clipboard contents into script.
 sudo apt install -y xclip
-ID=$(xclip -selection c -o)
+ID="$(xclip -selection c -o)"
 xinput --disable $ID
 zenity --info --text "Input device number $ID is disabled."
-zenity --info --text "Find the name of the correct device and copy event number next to sysreq."
+zenity --info --text "Find the name of the correct device and copy the event number next to sysreq."
 cat /proc/bus/input/devices > Inputlist.txt
 leafpad Inputlist.txt
-EVNUM=$(xclip -selection c -o)
+EVNUM="$(xclip -selection c -o)"
 zenity --info --text "Press all keys on keyboard that will be used. Remember order of buttons pressed. Press 'ctrl+c' when finished."
 sudo actkbd -s -d /dev/input/event$EVNUM > actkbd.config
