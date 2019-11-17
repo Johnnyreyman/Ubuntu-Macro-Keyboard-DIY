@@ -7,8 +7,8 @@ if [ "$(command -v actkbd)" ]
 then
     zenity --info --text "actkbd is already installed. Click OK to continue."
 else
-    Install="$(zenity --question --text "Would you like to install 'actkbd' to your computer?")"
-    if [ $Install -eq 0 ]
+    $(zenity --question --text "Would you like to install 'actkbd' to your computer?")
+    if [ $? -eq 0 ]
 	then
 		cd /tmp
 		wget https://github.com/thkala/actkbd/archive/master.zip
@@ -25,7 +25,7 @@ fi
 
 zenity --info --text "Copy the correct device ID for the second keyboard from the list."
 cd /tmp
-xinput list | & xargs -L 20 > Devices.txt
+xinput list |  xargs -L 20 > Devices.txt
 leafpad Devices.txt
 #xclip utility is required to paste clipboard contents into script.
 sudo apt install -y xclip
