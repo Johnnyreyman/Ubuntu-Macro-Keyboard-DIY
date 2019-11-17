@@ -36,7 +36,11 @@ else
     leafpad Devices.txt
 fi
 #xclip utility is required to paste clipboard contents into script.
+# Only install xclip once
+if [ ! -x "$(command -v xclip)" ]
+then
 sudo apt install -y xclip
+fi
 ID="$(xclip -selection c -o)"
 xinput --disable $ID
 zenity --info --text "Input device number $ID is disabled."
