@@ -1,34 +1,32 @@
 #!/bin/bash
 #This script automates the process of creating a macro-keyboard from any second keyboard using actkbd.
+# Make a function that tests if actkbd exists
 zenity --info --text "This simple wizard will help you enable your second keyboard to be a macro-keyboard."
-Test=$(actkbd --help)
-if [ $Test -eq "Command 'actkbd' not found" ]
+#Test=$("command -v actkbd")
+# Check that actkbd exists
+if [ "$(command -v actkbd)" ]
 then
-	Install=$(zenity --question --text "Would you like to install 'actkbd' to your computer?")
-	if [ $Install -eq 0 ]
+    zenity --info --text "actkbd is already installed. Click OK to continue."
+else
+    Install="$(zenity --question --text "Would you like to install 'actkbd' to your computer?")"
+    if [ $Install -eq 0 ]
 	then
 		cd /tmp
 		wget https://github.com/thkala/actkbd/archive/master.zip
 		unzip /tmp/master.zip
 		cd /tmp/actkbd-master
 		gksudo make install
-	fi
-	if [ $Install -eq 1 ]
-	then
-		zenity --info --text "Setup cancelled."
-		exit
-	fi
+    else
+        zenity --info --text "Setup cancelled."
+        exit
+    fi
 zenity --info --text "Install of 'actkbd' completed sucessfully."
+
 fi
 
-if [ $Test -d "Command 'actkbd' not found" ]
-then
-	zenity --info --text "Command 'actkbd' is installed. Click OK to continue."
-fi
-
-zenity --info --text "Copy correct device ID for second keyboard from list."
+zenity --info --text "Copy the correct device ID for the second keyboard from the list."
 cd /tmp
-xinput list |& xargs -L 20 > Devices.txt
+xinput list | & xargs -L 20 > Devices.txt
 leafpad Devices.txt
 #xclip utility is required to paste clipboard contents into script.
 sudo apt install -y xclip
