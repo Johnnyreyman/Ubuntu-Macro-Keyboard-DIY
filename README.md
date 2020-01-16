@@ -19,18 +19,22 @@ cd Ubuntu-Macro-Keyboard-DIY/
 
 ```
 
-3. Make `Macro-Keyboard Enabler Ubuntu.sh` executable
+3. There are two scripts that are intended to provide either a command line or GUI based configuration, to use the command line only option, `cd` into `scripts` and make all scripts executable.
 
 ```
-sudo chmod +x Macro-Keyboard\ Enabler\ Ubuntu.sh 
+cd scripts
 
-```
-
-4. Run the script and follow the instructions on the screen:
+sudo chmod +x .*.sh
 
 ```
 
-bash Macro-Keyboard\ Enabler\ Ubuntu.sh 
+
+
+4. Run the command line based script and follow the instructions on the screen:
+
+```
+
+bash macro_keyboard_cli.sh 
 
 
 ```
