@@ -1,68 +1,70 @@
 #!/bin/bash
-#This script automates the process of creating a macro-keyboard from any second keyboard using actkbd.
-#zenity --info --no-wrap --text "This simple wizard will help you enable your second keyboard to be a macro-keyboard."
-echo -e "\e[032m This simple wizard will help you enable your second keyboard to be a macro-keyboard \e[0m"
-#Test=$("command -v actkbd")
-# Check that actkbd exists
-if [ "$(command -v actkbd)" ]
-then
-echo -e "\e[032m actkbd is already installed. \e[0m"
-read -p "Do you wish to continue? (y/n)?" user_response
-case "$user_response" in
-    y|Y ) echo -e "\e[032m Continuing \e[0m";;
-    n|N ) echo -e "\e[032m You have chosen to exit \e[0m" ; exit ;;
-esac
 
+#Print formatted text in green color
+print_green() {
+  printf "\e[32m%s\e[0m\n" "$*"
+}
+
+# Print introduction message
+print_green "This simple wizard will help you enable your second keyboard to be a macro-keyboard"
+
+# Check if actkbd is installed and prompt user to continue
+if [ $(command -v actkbd >/dev/null 2>&1; echo $?) -eq 0 ]; then
+  print_green "actkbd is already installed."
+  read -p "Do you wish to continue? (y/n) " user_response
+  case "$user_response" in
+    y|Y ) print_green "Continuing";;
+    n|N ) print_green "You have chosen to exit." ; exit ;;
+  esac
 else
-    read -p "actkbd is not installed. Install it now?(y|n)" install_response
-    case "$install_response" in
-        y|Y ) echo -e "\e[032m Installing actkbd \e[0m" ; cd /tmp ; wget https://github.com/thkala/actkbd/archive/master.zip ; unzip /tmp/master.zip ;sudo -i make install ;;
-        n|N ) echo -e "\e[032m Setup was cancelled :) \e[0m" ;;
-    esac
-    #$(zenity --question --no-wrap --text "Would you like to install 'actkbd' to your computer?")
-    #if [ $? -eq 0 ]
-	#then
-	#	cd /tmp
-	#	wget https://github.com/thkala/actkbd/archive/master.zip
-	#	unzip /tmp/master.zip
-	#	cd /tmp/actkbd-master
-     #   cp ../actkbd.config .
-	#	sudo -i  make install
-    #else
-     #   zenity --info --no-wrap --text "Setup cancelled."
-      #  exit
-    #fi
-echo -e  "\e[032m Installation of 'actkbd' completed sucessfully. \e[0m"
-
+  # Prompt user to install actkbd
+  read -p "actkbd is not installed. Install it now?(y/n) " install_response
+  case "$install_response" in
+    y|Y )
+      print_green "Installing actkbd"
+      cd /tmp && wget -q https://github.com/thkala/actkbd/archive/master.zip && unzip master.zip &&
+      sudo make -C actkbd-master install >/dev/null;;
+    * ) print_green "Setup was cancelled :)";;
+  esac
+  print_green "Installation of 'actkbd' completed successfully."
 fi
 
-echo -e "\e[032m Copy the correct device ID for the second keyboard from the list \e[0m"
+# Print message to copy device ID
+print_green "Copy the correct device ID for the second keyboard from the list."
 
-#zenity --info --no-wrap --text "Copy the correct device ID for the second keyboard from the list."
+# Save a list of input devices for the user to choose from
+xinput list | xargs -L 20 > /tmp/devices.txt
 
-cd /tmp
+# Open the file with the user's default editor, or vim if none exists
+"${EDITOR:-vi}" /tmp/devices.txt
 
-xinput list |  xargs -L 20 > Devices.txt
-# Use user's default editor
-# Use vim otherwise..It is assumed that nano will be the default
-"${EDITOR:-vi}" Devices.txt
-#xclip utility is required to paste clipboard contents into script.
-# Only install xclip once
-if [ ! -x "$(command -v xclip)" ]
-then
-sudo apt install -y xclip
+# Install xclip if necessary to paste clipboard contents into script
+if ! command -v xclip >/dev/null 2>&1; then
+  sudo apt install -y xclip >/dev/null
 fi
+
+# Disable the selected input device by ID
 ID="$(xclip -selection c -o)"
-xinput --disable $ID
-echo -e "\e[032m Input device number "$ID" is disabled \e[0m"
-echo -e "\e[032m Find the name of the correct decice and copy the event number next to sysreq"
+xinput --disable "$ID"
+print_green "Input device number $ID is disabled."
 
-#zenity --info --no-wrap --text "Input device number $ID is disabled."
-#zenity --info --no-wrap --text "Find the name of the correct device and copy the event number next to sysreq."
-cat /proc/bus/input/devices > Inputlist.txt
-"${EDITOR:-vi}" Inputlist.txt
+# Print message to find event number
+print_green "Find the name of the correct device and copy the event number next to sysreq."
+
+# Save a list of input devices and their properties to a file for the user to choose from
+cat /proc/bus/input/devices > /tmp/inputlist.txt
+
+# Open the file with the user's default editor, or vim if none exists
+"${EDITOR:-vi}" /tmp/inputlist.txt
+
+# Save the event number of the selected device
 EVNUM="$(xclip -selection c -o)"
 
-#zenity --info --no-wrap --text "Press all keys on keyboard that will be used. Remember order of buttons pressed. Press 'ctrl+c' when finished."
-echo -e "\e[032m Press all keys on the keyboard that will be used. Remember the order of buttons pressed. Press "CTRTL + C" when done."
-sudo actkbd -s -d /dev/input/event$EVNUM > actkbd.config
+# Prompt user to press keys on the keyboard to be used
+print_green "Press all keys on the keyboard that will be used. Remember the order of buttons pressed. Press 'CTRL + C' when done."
+
+# Save the key mapping to a config file
+sudo actkbd -s -d "/dev/input/event$EVNUM" > actkbd.config
+
+# Run the configuration file as a daemon
+sudo actkbd -f actkbd.config -d &
